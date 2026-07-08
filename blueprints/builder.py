@@ -19,12 +19,12 @@ from authz import require_form_ownership, login_required_api
 builder_bp = Blueprint("builder", __name__)
 
 _QTYPE_LABELS_TH = {
-    "short": "คำตอบสั้น",
-    "paragraph": "ย่อหน้า",
     "multiple": "ปรนัยเลือกตอบ (Multiple choice)",
     "checkbox": "เลือกได้หลายข้อ (Checkboxes)",
     "dropdown": "ดรอปดาวน์",
     "scale": "แบบประมาณค่า (Linear scale)",
+    "short": "คำตอบสั้น",
+    "paragraph": "ย่อหน้า",
     "date": "วันที่",
     "time": "เวลา",
     "section": "แบ่งส่วน (Section)",
@@ -141,9 +141,8 @@ def delete_form(form_id):
 # Question CRUD (JSON API consumed by builder JS)
 # =========================================================================
 @builder_bp.route("/api/forms/<int:form_id>/questions", methods=["GET"])
-@login_required
+@login_required_api
 def list_questions(form_id):
-    require_form_ownership(form_id)
     form = require_form_ownership(form_id)
     return jsonify({"questions": [q.to_dict() for q in form.questions]})
 
@@ -251,7 +250,7 @@ def preview_form(form_id):
 def share_form(form_id):
     form = require_form_ownership(form_id)
     base = current_app.config["BASE_URL"].rstrip("/")
-    link = f"{base}{url_for('respond.view_form', form_id=form.id)}"
+    link = f"{base}{url_for('respond.view_form', token=form.public_id)}"
     return render_template("share_form.html", form=form, share_link=link)
 
 
@@ -261,7 +260,7 @@ def form_qr(form_id):
     form = require_form_ownership(form_id)
     import qrcode
     base = current_app.config["BASE_URL"].rstrip("/")
-    link = f"{base}{url_for('respond.view_form', form_id=form.id)}"
+    link = f"{base}{url_for('respond.view_form', token=form.public_id)}"
     img = qrcode.make(link, box_size=10, border=2)
     buf = io.BytesIO()
     img.save(buf, format="PNG")

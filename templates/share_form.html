@@ -18,7 +18,7 @@
     </div>
 
     <div class="share-actions">
-      <a href="{{ url_for('respond.view_form', form_id=form.id) }}" target="_blank" class="btn btn-secondary">เปิดฟอร์ม</a>
+      <a href="{{ url_for('respond.view_form', token=form.public_id) }}" target="_blank" class="btn btn-secondary">เปิดฟอร์ม</a>
       <a href="{{ url_for('dashboard.view_dashboard', form_id=form.id) }}" class="btn btn-ghost">ไป Dashboard</a>
     </div>
   </div>

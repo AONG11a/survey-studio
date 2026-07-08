@@ -40,6 +40,12 @@ class Config:
         or "sqlite:///" + os.path.join(BASE_DIR, "survey.db")
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    # Managed Postgres (Render/Neon) may drop idle connections; pre-ping
+    # detects stale ones and reconnects instead of erroring. Harmless on SQLite.
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "pool_pre_ping": True,
+        "pool_recycle": 300,
+    }
 
     # ---- Session / cookie hardening ----------------------------------------
     SESSION_COOKIE_HTTPONLY = True

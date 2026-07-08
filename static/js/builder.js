@@ -250,7 +250,7 @@
     panelTitle.textContent = q ? "แก้ไขคำถาม" : "เพิ่มคำถาม";
     form.qid.value = q ? q.id : "";
     form.text.value = q ? q.text : "";
-    typeSel.value = q ? q.type : "short";
+    typeSel.value = q ? q.type : "multiple";
     form.help_text.value = q ? (q.help_text || "") : "";
     form.scale_min.value = q ? (q.scale_min || 1) : 1;
     form.scale_max.value = q ? (q.scale_max || 5) : 5;

@@ -27,12 +27,24 @@ def _respondent_token():
 
 
 @respond_bp.route("/s/<int:form_id>")
-def view_form(form_id):
-    form = Form.query.get_or_404(form_id)
+def view_form_legacy(form_id):
+    """Old numeric links (/s/3) — redirect to the token link if the form
+    still exists. Numeric ids can be reused after deletion, so they are no
+    longer used as share links."""
+    form = db.session.get(Form, form_id)
+    if form is None or not form.public_id:
+        from flask import abort
+        abort(404)
+    return redirect(url_for("respond.view_form", token=form.public_id))
+
+
+@respond_bp.route("/s/<string:token>")
+def view_form(token):
+    form = Form.query.filter_by(public_id=token).first_or_404()
     if not form.is_active:
         return render_template("form_closed.html", form=form), 404
 
-    done_key = f"{COOKIE_NAME}_{form.id}"
+    done_key = f"{COOKIE_NAME}_{form.public_id}"
     already_done = request.cookies.get(done_key) == "1"
 
     questions = [q for q in form.questions if q.type != "section"]
@@ -48,6 +60,7 @@ def view_form(form_id):
         "survey_rid", _respondent_token(),
         max_age=current_app.config["RESPONDENT_COOKIE_LIFETIME"],
         httponly=True, samesite="Lax",
+        secure=current_app.config["SESSION_COOKIE_SECURE"],
     )
     return resp
 
@@ -160,7 +173,9 @@ def submit_form(form_id):
     if not form.is_active:
         return jsonify({"error": "form_closed"}), 403
 
-    done_key = f"{COOKIE_NAME}_{form.id}"
+    # Keyed by the form's unique token (NOT the reusable numeric id) so a new
+    # form can never inherit "already submitted" state from a deleted one.
+    done_key = f"{COOKIE_NAME}_{form.public_id}"
     if request.cookies.get(done_key) == "1":
         return jsonify({"error": "already_submitted"}), 409
 
@@ -215,10 +230,12 @@ def submit_form(form_id):
         done_key, "1",
         max_age=current_app.config["RESPONDENT_COOKIE_LIFETIME"],
         httponly=True, samesite="Lax",
+        secure=current_app.config["SESSION_COOKIE_SECURE"],
     )
     out.set_cookie(
         "survey_rid", rid,
         max_age=current_app.config["RESPONDENT_COOKIE_LIFETIME"],
         httponly=True, samesite="Lax",
+        secure=current_app.config["SESSION_COOKIE_SECURE"],
     )
     return out

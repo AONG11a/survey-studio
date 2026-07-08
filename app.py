@@ -115,6 +115,9 @@ def create_app():
     # ---- Create tables on first run ---------------------------------------
     with app.app_context():
         db.create_all()
+        # Add forms.public_id to databases created before share-link tokens.
+        from models import ensure_form_public_ids
+        ensure_form_public_ids()
         # Users self-register — no bootstrap admin is created automatically.
 
     return app
