@@ -21,3 +21,7 @@ services:
       # Live URL — used to build correct share links + QR codes.
       - key: BASE_URL
         value: "https://survey-studio.onrender.com"
+      # Neon Postgres connection string — keeps data across redeploys.
+      # Set the actual value in Render Dashboard (this line just declares it).
+      - key: DATABASE_URL
+        sync: false
