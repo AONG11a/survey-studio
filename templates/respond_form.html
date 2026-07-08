@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ form.title }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body class="respond-body">
+  {% if already_done %}
+    <div class="respond-wrap">
+      <div class="respond-card respond-thanks">
+        <div class="thanks-check">✓</div>
+        <h1>คุณตอบแบบสอบถามนี้ไปแล้ว</h1>
+        <p class="muted">ขอบคุณที่เข้าร่วม — ไม่สามารถตอบซ้ำได้</p>
+      </div>
+    </div>
+  {% else %}
+  <div class="respond-wrap">
+    <div class="respond-card">
+      <h1>{{ form.title }}</h1>
+      {% if form.description %}<p class="respond-desc">{{ form.description }}</p>{% endif %}
+
+      <form id="respondForm" data-form-id="{{ form.id }}">
+        {% for section in sections %}
+          {% if section.title %}
+            <div class="section-divider"><span>{{ section.title }}</span></div>
+          {% endif %}
+
+          {% for q in section.questions %}
+          <div class="respond-q" data-qid="{{ q.id }}" data-type="{{ q.type }}" data-required="{{ 'true' if q.required else 'false' }}">
+            <label class="respond-q-label">
+              {{ q.text }}
+              {% if q.required %}<span class="req-star">*</span>{% endif %}
+            </label>
+            {% if q.help_text %}<p class="respond-q-help">{{ q.help_text }}</p>{% endif %}
+            <div class="respond-error" data-err-for="{{ q.id }}"></div>
+
+            {% if q.type == 'short' %}
+              <input type="text" name="q_{{ q.id }}" data-qid="{{ q.id }}">
+
+            {% elif q.type == 'paragraph' %}
+              <textarea name="q_{{ q.id }}" data-qid="{{ q.id }}" rows="3"></textarea>
+
+            {% elif q.type == 'multiple' %}
+              {% for opt in q.to_dict().options %}
+              <label class="respond-option">
+                <input type="radio" name="q_{{ q.id }}" value="{{ opt }}" data-qid="{{ q.id }}">
+                <span>{{ opt }}</span>
+              </label>
+              {% endfor %}
+
+            {% elif q.type == 'checkbox' %}
+              {% for opt in q.to_dict().options %}
+              <label class="respond-option">
+                <input type="checkbox" name="q_{{ q.id }}" value="{{ opt }}" data-qid="{{ q.id }}">
+                <span>{{ opt }}</span>
+              </label>
+              {% endfor %}
+
+            {% elif q.type == 'dropdown' %}
+              <select name="q_{{ q.id }}" data-qid="{{ q.id }}">
+                <option value="">— เลือก —</option>
+                {% for opt in q.to_dict().options %}
+                <option value="{{ opt }}">{{ opt }}</option>
+                {% endfor %}
+              </select>
+
+            {% elif q.type == 'scale' %}
+              <div class="respond-scale">
+                {% if q.scale_label_low %}<span class="scale-label">{{ q.scale_label_low }}</span>{% endif %}
+                {% for i in range(q.scale_min, q.scale_max + 1) %}
+                <label class="scale-cell">
+                  <input type="radio" name="q_{{ q.id }}" value="{{ i }}" data-qid="{{ q.id }}">
+                  <span>{{ i }}</span>
+                </label>
+                {% endfor %}
+                {% if q.scale_label_high %}<span class="scale-label">{{ q.scale_label_high }}</span>{% endif %}
+              </div>
+
+            {% elif q.type == 'date' %}
+              <input type="date" name="q_{{ q.id }}" data-qid="{{ q.id }}">
+
+            {% elif q.type == 'time' %}
+              <input type="time" name="q_{{ q.id }}" data-qid="{{ q.id }}">
+            {% endif %}
+          </div>
+          {% endfor %}
+        {% endfor %}
+
+        {% if sections %}
+        <button type="submit" class="btn btn-primary btn-block btn-submit">ส่งคำตอบ</button>
+        {% else %}
+          <p class="muted">ยังไม่มีคำถามในฟอร์มนี้</p>
+        {% endif %}
+      </form>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/respond.js') }}"></script>
+  {% endif %}
+</body>
+</html>

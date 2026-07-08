@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>{% block title %}Survey Platform{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  {% if current_user.is_authenticated %}
+  <nav class="topbar">
+    <div class="topbar-inner">
+      <a href="{{ url_for('builder.my_forms') }}" class="brand">
+        <span class="brand-dot"></span> Survey Studio
+      </a>
+      <div class="nav-right">
+        <span class="user-chip">{{ current_user.username }}</span>
+        <a href="{{ url_for('builder.my_forms') }}" class="nav-link">ฟอร์มของฉัน</a>
+        <form method="post" action="{{ url_for('builder.new_form') }}" style="display:inline">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="btn btn-primary btn-sm">+ ฟอร์มใหม่</button>
+        </form>
+        <a href="{{ url_for('auth.logout') }}" class="nav-link">ออกจากระบบ</a>
+      </div>
+    </div>
+  </nav>
+  {% endif %}
+
+  <main class="container {% block container_class %}{% endblock %}">
+    {% block flashes %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flashes">
+          {% for category, msg in messages %}
+            <div class="flash flash-{{ category }}">{{ msg }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% endblock %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

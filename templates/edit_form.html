@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}แก้ไขฟอร์ม — {{ form.title }}{% endblock %}
+
+{% block head %}
+<script>
+  window.FORM_ID = {{ form.id }};
+  window.QTYPES = {{ question_types | tojson }};
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="builder-layout">
+  <!-- Left: form meta + question list -->
+  <div class="builder-main">
+    <header class="builder-head">
+      <a href="{{ url_for('builder.my_forms') }}" class="back-link">← กลับ</a>
+      <div class="builder-head-actions">
+        <button id="btnToggleActive" class="btn btn-ghost btn-sm" data-active="{{ form.is_active }}">
+          {{ 'ปิดรับคำตอบ' if form.is_active else 'เปิดรับคำตอบ' }}
+        </button>
+        <a href="{{ url_for('builder.preview_form', form_id=form.id) }}" target="_blank" class="btn btn-secondary btn-sm">พรีวิว</a>
+        <a href="{{ url_for('dashboard.view_dashboard', form_id=form.id) }}" class="btn btn-primary btn-sm">ดู Dashboard</a>
+      </div>
+    </header>
+
+    <form method="post" class="form-meta-card" id="formMeta">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="text" name="title" value="{{ form.title }}" class="form-title-input" placeholder="ชื่อแบบสอบถาม">
+      <textarea name="description" class="form-desc-input" placeholder="คำอธิบาย (ไม่บังคับ)" rows="2">{{ form.description }}</textarea>
+      <button type="submit" class="btn btn-ghost btn-sm">บันทึกชื่อ/คำอธิบาย</button>
+    </form>
+
+    <div id="questionList" class="question-list">
+      <!-- rendered by JS -->
+      <div class="loading-skeleton">กำลังโหลดคำถาม…</div>
+    </div>
+
+    <button id="btnAddQuestion" class="btn btn-secondary btn-block add-q-btn">+ เพิ่มคำถาม</button>
+  </div>
+
+  <!-- Right: edit panel (slides in when editing a question) -->
+  <aside class="builder-side" id="editPanel" hidden>
+    <div class="edit-panel-head">
+      <h3 id="editPanelTitle">เพิ่มคำถาม</h3>
+      <button id="btnCloseEdit" class="btn btn-ghost btn-sm">ปิด</button>
+    </div>
+    <form id="questionForm" class="edit-form">
+      <input type="hidden" name="qid" value="">
+      <label>
+        <span>คำถาม</span>
+        <input type="text" name="text" required placeholder="พิมพ์คำถามที่นี่">
+      </label>
+      <label>
+        <span>ประเภทคำถาม</span>
+        <select name="type" id="qType">
+          {% for value, label in qtype_labels.items() %}
+          <option value="{{ value }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>
+        <span>คำอธิบายเพิ่มเติม (ไม่บังคับ)</span>
+        <input type="text" name="help_text" placeholder="คำใบ้หรือคำอธิบาย">
+      </label>
+
+      <div id="optionsGroup" hidden>
+        <span class="field-label">ตัวเลือก</span>
+        <div id="optionsList"></div>
+        <button type="button" id="btnAddOption" class="btn btn-ghost btn-sm add-opt-btn">+ เพิ่มตัวเลือก</button>
+      </div>
+
+      <div id="scaleGroup" hidden>
+        <div class="grid-2">
+          <label>
+            <span>ค่าต่ำสุด</span>
+            <input type="number" name="scale_min" value="1">
+          </label>
+          <label>
+            <span>ค่าสูงสุด</span>
+            <input type="number" name="scale_max" value="5">
+          </label>
+        </div>
+        <label>
+          <span>ป้ายค่าต่ำ (ไม่บังคับ)</span>
+          <input type="text" name="scale_label_low" placeholder="น้อยที่สุด">
+        </label>
+        <label>
+          <span>ป้ายค่าสูง (ไม่บังคับ)</span>
+          <input type="text" name="scale_label_high" placeholder="มากที่สุด">
+        </label>
+      </div>
+
+      <label class="checkbox-row">
+        <input type="checkbox" name="required"> <span>บังคับตอบ</span>
+      </label>
+
+      <div class="q-preview">
+        <div class="q-preview-label">👁 ตัวอย่างที่ผู้ตอบจะเห็น</div>
+        <div id="previewBox"></div>
+      </div>
+
+      <div class="edit-form-actions">
+        <button type="submit" class="btn btn-primary" id="btnSaveQuestion">บันทึก</button>
+        <button type="button" class="btn btn-ghost" id="btnCancelEdit">ยกเลิก</button>
+      </div>
+    </form>
+  </aside>
+</div>
+
+<form id="deleteForm" method="post" action="{{ url_for('builder.delete_form', form_id=form.id) }}"
+      onsubmit="return confirm('ต้องการลบฟอร์มนี้ทั้งหมด? ไม่สามารถกู้คืนได้');"
+      style="margin-top:32px">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <button type="submit" class="btn btn-danger btn-sm">ลบฟอร์มนี้ทั้งหมด</button>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/builder.js') }}"></script>
+{% endblock %}

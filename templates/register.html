@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}สมัครสมาชิก — Survey Studio{% endblock %}
+
+{% block container_class %}auth-wrap{% endblock %}
+{# suppress the default top-of-page flashes; we render them inside the card #}
+{% block flashes %}{% endblock %}
+{% block content %}
+<div class="auth-card">
+  <h1>สมัครสมาชิก</h1>
+  <p class="muted">สร้างบัญชีเพื่อเริ่มสร้างแบบสอบถาม</p>
+
+  <form method="post" class="auth-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>
+      <span>ชื่อผู้ใช้</span>
+      <input type="text" name="username" value="{{ username or '' }}" required autofocus
+             placeholder="3-30 ตัวอักษร A-Z a-z 0-9 _">
+    </label>
+    <label>
+      <span>อีเมล</span>
+      <input type="email" name="email" value="{{ email or '' }}" required>
+    </label>
+    <label>
+      <span>รหัสผ่าน</span>
+      <input type="password" name="password" required minlength="6">
+    </label>
+    <label>
+      <span>ยืนยันรหัสผ่าน</span>
+      <input type="password" name="confirm" required minlength="6">
+    </label>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, msg in messages %}
+      <div class="flash flash-{{ category }}">{{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+    <button type="submit" class="btn btn-primary btn-block">สมัครสมาชิก</button>
+  </form>
+
+  <p class="auth-switch">มีบัญชีอยู่แล้ว? <a href="{{ url_for('auth.login') }}">เข้าสู่ระบบ</a></p>
+</div>
+{% endblock %}

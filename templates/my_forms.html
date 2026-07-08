@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}ฟอร์มของฉัน — Survey Studio{% endblock %}
+
+{% block content %}
+<header class="page-head">
+  <div>
+    <h1>ฟอร์มของฉัน</h1>
+    <p class="muted">สร้าง แก้ไข และดูผลลัพธ์แบบสอบถามของคุณ</p>
+  </div>
+  <form method="post" action="{{ url_for('builder.new_form') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button type="submit" class="btn btn-primary">+ สร้างฟอร์มใหม่</button>
+  </form>
+</header>
+
+{% if forms %}
+<div class="form-grid">
+  {% for f in forms %}
+  <article class="form-card {{ 'inactive' if not f.is_active else '' }}">
+    <div class="form-card-top">
+      <span class="badge {{ 'badge-green' if f.is_active else 'badge-gray' }}">
+        {{ 'เปิดอยู่' if f.is_active else 'ปิดอยู่' }}
+      </span>
+      <span class="badge badge-blue">{{ f.responses.count() }} คำตอบ</span>
+    </div>
+    <h3 class="form-card-title">{{ f.title }}</h3>
+    <p class="form-card-desc">{{ f.description[:120] + '…' if f.description and f.description|length > 120 else (f.description or '—') }}</p>
+    <div class="form-card-meta">
+      <span>{{ f.questions|length }} คำถาม</span>
+      <span>·</span>
+      <span>อัปเดต {{ f.updated_at.strftime('%d/%m/%Y') }}</span>
+    </div>
+    <div class="form-card-actions">
+      <a href="{{ url_for('builder.edit_form', form_id=f.id) }}" class="btn btn-ghost btn-sm">แก้ไข</a>
+      <a href="{{ url_for('dashboard.view_dashboard', form_id=f.id) }}" class="btn btn-secondary btn-sm">Dashboard</a>
+      <a href="{{ url_for('builder.share_form', form_id=f.id) }}" class="btn btn-ghost btn-sm">แชร์</a>
+    </div>
+  </article>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <h2>ยังไม่มีฟอร์ม</h2>
+  <p class="muted">กด "สร้างฟอร์มใหม่" เพื่อเริ่มต้น</p>
+</div>
+{% endif %}
+{% endblock %}

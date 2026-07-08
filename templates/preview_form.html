@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}พรีวิว — {{ form.title }}{% endblock %}
+{% block content %}
+<div class="respond-wrap respond-preview">
+  <div class="respond-card">
+    <h1>{{ form.title }}</h1>
+    {% if form.description %}<p class="respond-desc">{{ form.description }}</p>{% endif %}
+    <p class="badge badge-blue">พรีวิว — จะไม่มีการบันทึกคำตอบ</p>
+
+    {% if not form.questions %}
+      <p class="muted">ยังไม่มีคำถามในฟอร์มนี้</p>
+    {% endif %}
+
+    {% for q in form.questions %}
+      {% if q.type == 'section' %}
+        <div class="section-divider"><span>{{ q.text }}</span></div>
+      {% else %}
+      <div class="respond-q" data-qid="{{ q.id }}">
+        <label class="respond-q-label">
+          {{ q.text }}
+          {% if q.required %}<span class="req-star">*</span>{% endif %}
+        </label>
+        {% if q.help_text %}<p class="respond-q-help">{{ q.help_text }}</p>{% endif %}
+
+        {% if q.type == 'short' %}
+          <input type="text" disabled>
+        {% elif q.type == 'paragraph' %}
+          <textarea rows="3" disabled></textarea>
+        {% elif q.type == 'multiple' %}
+          {% for opt in q.to_dict().options %}
+          <label class="respond-option"><input type="radio" disabled> <span>{{ opt }}</span></label>
+          {% endfor %}
+        {% elif q.type == 'checkbox' %}
+          {% for opt in q.to_dict().options %}
+          <label class="respond-option"><input type="checkbox" disabled> <span>{{ opt }}</span></label>
+          {% endfor %}
+        {% elif q.type == 'dropdown' %}
+          <select disabled>
+            {% for opt in q.to_dict().options %}<option>{{ opt }}</option>{% endfor %}
+          </select>
+        {% elif q.type == 'scale' %}
+          <div class="respond-scale">
+            {% if q.scale_label_low %}<span class="scale-label">{{ q.scale_label_low }}</span>{% endif %}
+            {% for i in range(q.scale_min, q.scale_max + 1) %}
+              <label class="scale-cell"><input type="radio" disabled> <span>{{ i }}</span></label>
+            {% endfor %}
+            {% if q.scale_label_high %}<span class="scale-label">{{ q.scale_label_high }}</span>{% endif %}
+          </div>
+        {% elif q.type == 'date' %}
+          <input type="date" disabled>
+        {% elif q.type == 'time' %}
+          <input type="time" disabled>
+        {% endif %}
+      </div>
+      {% endif %}
+    {% endfor %}
+
+    <div style="margin-top:24px;text-align:center">
+      <a href="{{ url_for('builder.edit_form', form_id=form.id) }}" class="btn btn-secondary">← กลับไปแก้ไข</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

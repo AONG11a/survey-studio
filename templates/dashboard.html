@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — {{ form.title }}{% endblock %}
+
+{% block head %}
+<script>
+  window.FORM_ID = {{ form.id }};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="dash-head">
+  <a href="{{ url_for('builder.my_forms') }}" class="back-link">← ฟอร์มของฉัน</a>
+  <div class="dash-head-actions">
+    <a href="{{ url_for('builder.edit_form', form_id=form.id) }}" class="btn btn-ghost btn-sm">แก้ไขฟอร์ม</a>
+    <a href="{{ url_for('builder.share_form', form_id=form.id) }}" class="btn btn-ghost btn-sm">แชร์</a>
+    <a href="{{ url_for('dashboard.export_csv', form_id=form.id) }}" class="btn btn-secondary btn-sm">⬇ CSV</a>
+    <a href="{{ url_for('dashboard.export_xlsx', form_id=form.id) }}" class="btn btn-secondary btn-sm">⬇ Excel</a>
+  </div>
+</div>
+
+<h1 class="dash-title">{{ form.title }}</h1>
+{% if form.description %}<p class="muted dash-subtitle">{{ form.description }}</p>{% endif %}
+
+<!-- Real-time status -->
+<div class="rt-status" id="rtStatus">
+  <span class="rt-dot rt-dot-connecting"></span>
+  <span id="rtText">กำลังเชื่อมต่อแบบเรียลไทม์…</span>
+</div>
+
+<!-- Filters -->
+<div class="dash-filters">
+  <label>
+    <span>จากวันที่</span>
+    <input type="date" id="filterFrom">
+  </label>
+  <label>
+    <span>ถึงวันที่</span>
+    <input type="date" id="filterTo">
+  </label>
+  <button id="btnApplyFilter" class="btn btn-primary btn-sm">ใช้ตัวกรอง</button>
+  <button id="btnClearFilter" class="btn btn-ghost btn-sm">ล้าง</button>
+</div>
+
+<!-- Overview -->
+<div class="dash-overview" id="dashOverview">
+  <div class="kpi-card">
+    <div class="kpi-label">ผู้ตอบทั้งหมด</div>
+    <div class="kpi-value" id="kpiTotal">—</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">อัตราตอบครบ (%)</div>
+    <div class="kpi-value" id="kpiCompletion">—</div>
+  </div>
+  <div class="kpi-card kpi-wide">
+    <div class="kpi-label">แนวโน้มจำนวนคำตอบ</div>
+    <div class="kpi-chart-wrap"><canvas id="trendChart"></canvas></div>
+  </div>
+</div>
+
+<!-- Per-question analysis -->
+<section class="dash-questions" id="dashQuestions">
+  <div class="loading-skeleton">กำลังโหลดข้อมูล…</div>
+</section>
+
+<!-- Individual responses -->
+<section class="dash-individual">
+  <div class="ind-head">
+    <h2>คำตอบรายบุคคล</h2>
+    <div>
+      <button id="btnPrevResp" class="btn btn-ghost btn-sm">‹ ก่อนหน้า</button>
+      <span id="respIndex">— / —</span>
+      <button id="btnNextResp" class="btn btn-ghost btn-sm">ถัดไป ›</button>
+    </div>
+  </div>
+  <div class="ind-card" id="indCard">
+    <p class="muted">เลือกเพื่อดูคำตอบแต่ละคน</p>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

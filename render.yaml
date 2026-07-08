@@ -1,0 +1,24 @@
+# Render Blueprint — lets Render auto-configure the service from this repo.
+# In Render: New + → Blueprint → pick your repo. Or configure manually with the
+# Build/Start commands below (see DEPLOY.md).
+services:
+  - type: web
+    name: survey-studio
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    envVars:
+      # Pin a Python version with prebuilt wheels (avoid the eventlet/3.14 issue).
+      - key: PYTHON_VERSION
+        value: "3.12.7"
+      # Auto-generate a strong secret for signing sessions.
+      - key: SECRET_KEY
+        generateValue: true
+      # Cookies are only sent over HTTPS (Render serves HTTPS by default).
+      - key: FORCE_HTTPS
+        value: "1"
+      # After the first deploy, set this to your live URL, e.g.
+      # https://survey-studio.onrender.com  (used for share links + QR codes).
+      - key: BASE_URL
+        sync: false

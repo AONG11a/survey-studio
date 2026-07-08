@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}แชร์ฟอร์ม — {{ form.title }}{% endblock %}
+{% block content %}
+<div class="share-wrap">
+  <h1>แชร์ฟอร์ม</h1>
+  <p class="muted">ส่งลิงก์นี้ให้ผู้ตอบ — ไม่ต้องเข้าสู่ระบบ</p>
+
+  <div class="share-card">
+    <h3>{{ form.title }}</h3>
+    <div class="share-link-row">
+      <input type="text" readonly value="{{ share_link }}" id="shareLink" class="share-input">
+      <button class="btn btn-primary" id="btnCopyLink">คัดลอก</button>
+    </div>
+
+    <div class="share-qr">
+      <img src="{{ url_for('builder.form_qr', form_id=form.id) }}" alt="QR Code">
+      <p class="muted small">สแกน QR เพื่อเปิดฟอร์ม</p>
+    </div>
+
+    <div class="share-actions">
+      <a href="{{ url_for('respond.view_form', form_id=form.id) }}" target="_blank" class="btn btn-secondary">เปิดฟอร์ม</a>
+      <a href="{{ url_for('dashboard.view_dashboard', form_id=form.id) }}" class="btn btn-ghost">ไป Dashboard</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('btnCopyLink').addEventListener('click', async () => {
+  const inp = document.getElementById('shareLink');
+  try {
+    await navigator.clipboard.writeText(inp.value);
+    const btn = document.getElementById('btnCopyLink');
+    const old = btn.textContent;
+    btn.textContent = 'คัดลอกแล้ว ✓';
+    setTimeout(() => btn.textContent = old, 1500);
+  } catch (e) {
+    inp.select(); document.execCommand('copy');
+  }
+});
+</script>
+{% endblock %}

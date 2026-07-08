@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}เข้าสู่ระบบ — Survey Studio{% endblock %}
+
+{% block container_class %}auth-wrap{% endblock %}
+{# suppress the default top-of-page flashes; we render them inside the card #}
+{% block flashes %}{% endblock %}
+{% block content %}
+<div class="auth-card">
+  <h1>เข้าสู่ระบบ</h1>
+  <p class="muted">ลงชื่อเข้าใช้เพื่อจัดการแบบสอบถามของคุณ</p>
+
+  <form method="post" class="auth-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>
+      <span>ชื่อผู้ใช้หรืออีเมล</span>
+      <input type="text" name="identifier" value="{{ identifier or '' }}" required autofocus>
+    </label>
+    <label>
+      <span>รหัสผ่าน</span>
+      <input type="password" name="password" required>
+    </label>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, msg in messages %}
+      <div class="flash flash-{{ category }}">{{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+    <label class="checkbox-row">
+      <input type="checkbox" name="remember"> <span>จดจำการเข้าสู่ระบบ</span>
+    </label>
+    <button type="submit" class="btn btn-primary btn-block">เข้าสู่ระบบ</button>
+  </form>
+
+  <p class="auth-switch">ยังไม่มีบัญชี? <a href="{{ url_for('auth.register') }}">สมัครสมาชิก</a></p>
+</div>
+{% endblock %}

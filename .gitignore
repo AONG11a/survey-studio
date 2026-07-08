@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+env/
+
+# App runtime files (must NOT be committed)
+survey.db
+.secret_key
+.env
+
+# Node (only used for local testing)
+node_modules/
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
