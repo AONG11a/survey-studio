@@ -18,7 +18,6 @@ services:
       # Cookies are only sent over HTTPS (Render serves HTTPS by default).
       - key: FORCE_HTTPS
         value: "1"
-      # After the first deploy, set this to your live URL, e.g.
-      # https://survey-studio.onrender.com  (used for share links + QR codes).
+      # Live URL — used to build correct share links + QR codes.
       - key: BASE_URL
-        sync: false
+        value: "https://survey-studio.onrender.com"
